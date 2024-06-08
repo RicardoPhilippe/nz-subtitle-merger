@@ -1,0 +1,5 @@
+# Ignorar todos os arquivos e subpastas dentro da pasta 'files'
+files/
+
+# Ignorar todos os arquivos e subpastas dentro da pasta 'scripts'
+scripts/
