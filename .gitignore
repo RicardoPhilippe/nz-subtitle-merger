@@ -1,6 +1,4 @@
-# Ignorar todos os arquivos e subpastas dentro da pasta 'files'
 files/
-
-# Ignorar todos os arquivos e subpastas dentro da pasta 'scripts'
+output/
 scripts/720p.avs
 scripts/1080p.avs

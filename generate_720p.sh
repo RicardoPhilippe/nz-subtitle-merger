@@ -30,13 +30,13 @@ for input_video in "$input_dir"/*.mkv; do
     cat "$avs_script"
     
     # Run ffmpeg to encode video
-    ffmpeg -hide_banner -i "$avs_script" -c:v h264_nvenc -cq 23 "$output_video"
+    ffmpeg -hide_banner -y -i "$avs_script" -c:v h264_nvenc -cq 23 "$output_video"
     
     # Print output video status
     echo "Created output video: $output_video"
 
     # Copy audio tracks from input video to temporary video with audio
-    ffmpeg -hide_banner -i "$output_video" -i "$input_video" -c copy -map 0:v:0 -map 1:a "$temp_video"
+    ffmpeg -hide_banner -y -i "$output_video" -i "$input_video" -c copy -map 0:v:0 -map 1:a "$temp_video"
 
     # Replace original output video with the new one
     mv -f "$temp_video" "$output_video"
