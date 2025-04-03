@@ -1,8 +1,10 @@
 LoadPlugin("..\libs\VSFilterMod.dll")
 LoadPlugin("..\libs\LSMASHSource.dll")
-LWLibavVideoSource(".%input_video%")
+clip = LWLibavVideoSource(".%input_video%").ConvertBits(8)
 #deinterlace
 #crop
-LanczosResize(1280,720) # Lanczos (Sharp)
+new_width = Round(clip.Width * 720.0 / clip.Height)
+clip = clip.LanczosResize(new_width, 720)
 #denoise
-TextSubMod(".%input_subtitle%", 1)
+clip = clip.TextSubMod(".%input_subtitle%", 1)
+clip

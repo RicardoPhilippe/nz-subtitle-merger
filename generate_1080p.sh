@@ -1,45 +1,58 @@
 #!/bin/bash
 
-# Directory paths
+# Diretórios
 input_dir="$(dirname "$0")/files"
 output_dir="$(dirname "$0")/output"
 script_dir="$(dirname "$0")/scripts"
 
-# Prepare the Avisynth script template
+# Template do script Avisynth
 avs_template="$script_dir/1080p_template.avs"
 avs_script="$script_dir/1080p.avs"
 
-# Loop through MKV files in the input directory
+# Loop pelos arquivos MKV na pasta de entrada
 for input_video in "$input_dir"/*.mkv; do
     input_subtitle="${input_video%.mkv}.ass"
     output_video="$output_dir/$(basename "${input_video%.mkv}.1080p.mkv")"
     temp_video="$output_dir/temp_video_with_audio.mkv"
 
-    # Print current file being processed
+    # Exibe o arquivo atual sendo processado
     echo "Processing $input_video"
 
-    # Create a new Avisynth script with the correct parameters
+    # Cria o script Avisynth com os parâmetros corretos
     while IFS= read -r line; do
         line="${line//%input_video%/$input_video}"
         line="${line//%input_subtitle%/$input_subtitle}"
         echo "$line"
     done < "$avs_template" > "$avs_script"
 
-    # Print the generated Avisynth script for debugging
+    # Exibe o script Avisynth gerado para debug
     echo "Generated Avisynth script:"
     cat "$avs_script"
     
-    # Run ffmpeg to encode video
+    # Executa o ffmpeg para codificar o vídeo
     ffmpeg -hide_banner -y -i "$avs_script" -c:v h264_nvenc -cq 23 "$output_video"
     
-    # Print output video status
     echo "Created output video: $output_video"
 
-    # Copy audio tracks from input video to temporary video with audio
+    # Copia as faixas de áudio do vídeo de entrada para um arquivo temporário
     ffmpeg -hide_banner -y -i "$output_video" -i "$input_video" -c copy -map 0:v:0 -map 1:a "$temp_video"
 
-    # Replace original output video with the new one
+    # Substitui o arquivo de saída original pelo arquivo com áudio
     mv -f "$temp_video" "$output_video"
 
+    # Calcula o CRC do arquivo de saída usando o cksum
+    crc=$(cksum "$output_video" | awk '{print $1}')
+    # Extrai o nome do arquivo e seus componentes
+    filename=$(basename "$output_video")
+    dirname=$(dirname "$output_video")
+    base="${filename%.*}"   # remove a extensão
+    ext="${filename##*.}"
+    # Substitui ".1080p" por " [1080p]" e adiciona o CRC
+    name="${base/.1080p/ [1080p]}"
+    # Adiciona o prefixo [NewWave] e o CRC no nome do arquivo
+    new_filename="[NewWave] ${name} [${crc}].${ext}"
+    mv -f "$output_video" "$dirname/$new_filename"
+    
+    echo "Renamed output video to: $dirname/$new_filename"
     echo "Audio tracks copied successfully for $input_video!"
 done

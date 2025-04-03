@@ -1,6 +1,7 @@
 LoadPlugin("..\libs\VSFilterMod.dll")
 LoadPlugin("..\libs\LSMASHSource.dll")
-LWLibavVideoSource(".%input_video%")
+clip = LWLibavVideoSource(".%input_video%").ConvertBits(8)
 #deinterlace
 #denoise
-TextSubMod(".%input_subtitle%", 1)
+clip = clip.TextSubMod(".%input_subtitle%", 1)
+clip
